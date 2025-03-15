@@ -72,30 +72,27 @@ def get_data_dict(dataloader):
 
 def get_next_batch(data_dict, test_interp=False):
     """
-    获取并处理下一批次数据，确保所有张量在正确的设备上
-    
-    Args:
-        data_dict: 包含原始数据的字典
-        test_interp: 是否为插值测试模式
-    Returns:
-        batch_dict: 处理后的数据字典
+    Fetch and process the next batch of data, ensuring all tensors are on the correct device.
+
+Args:
+
+data_dict: A dictionary containing the raw data.
+test_interp: Whether it is in interpolation test mode.
+Returns:
+
+batch_dict: The processed data dictionary.
     """
-    # 首先确定主设备
     device = next(tensor for tensor in data_dict.values() 
                  if isinstance(tensor, torch.Tensor)).device
     
-    # 创建新的批次字典并确保设备一致性
     batch_dict = get_dict_template()
     
-    # 复制基本属性
     batch_dict["mode"] = data_dict["mode"]
     
-    # 将所有张量数据转移到正确的设备
     for key in ["observed_data", "observed_tp", "data_to_predict", "tp_to_predict"]:
         if key in data_dict and isinstance(data_dict[key], torch.Tensor):
             batch_dict[key] = data_dict[key].to(device)
-    
-    # 处理观察数据的掩码
+
     if ("observed_mask" in data_dict) and (data_dict["observed_mask"] is not None):
         batch_dict["observed_mask"] = data_dict["observed_mask"].to(device)
         filter_mask = batch_dict["observed_mask"].unsqueeze(-1).unsqueeze(-1).to(device)
@@ -103,13 +100,12 @@ def get_next_batch(data_dict, test_interp=False):
         if not test_interp:
             batch_dict["observed_data"] = filter_mask * batch_dict["observed_data"]
         else:
-            # 插值测试模式的特殊处理
-            selected_mask = batch_dict["observed_mask"].squeeze(-1).bool()  # 改用 bool() 替代 byte()
+            selected_mask = batch_dict["observed_mask"].squeeze(-1).bool()  
             b, t, c, h, w = batch_dict["observed_data"].size()
             batch_dict["observed_data"] = batch_dict["observed_data"][selected_mask, ...].view(b, t // 2, c, h, w)
-            batch_dict["observed_mask"] = torch.ones(b, t // 2, 1).to(device)  # 确保设备一致
+            batch_dict["observed_mask"] = torch.ones(b, t // 2, 1).to(device)  
 
-    # 处理预测数据的掩码
+
     if ("mask_predicted_data" in data_dict) and (data_dict["mask_predicted_data"] is not None):
         batch_dict["mask_predicted_data"] = data_dict["mask_predicted_data"].to(device)
         filter_mask = batch_dict["mask_predicted_data"].unsqueeze(-1).unsqueeze(-1).to(device)
@@ -119,14 +115,12 @@ def get_next_batch(data_dict, test_interp=False):
             batch_dict["data_to_predict"] = filter_mask * batch_dict["data_to_predict"]
         else:
             b, t, c, h, w = batch_dict["data_to_predict"].size()
-            # 生成预测时间步并确保在正确的设备上
             batch_dict["tp_to_predict"] = torch.arange(0, t, device=device).float() / t
             
-            # 处理掩码
             selected_mask = (torch.ones_like(batch_dict["mask_predicted_data"]) - 
                            batch_dict["mask_predicted_data"])
-            selected_mask[:, -1, :] = 0.  # 排除最后一帧
-            selected_mask = selected_mask.squeeze(-1).bool()  # 使用 bool() 替代 byte()
+            selected_mask[:, -1, :] = 0.  
+            selected_mask = selected_mask.squeeze(-1).bool()
             batch_dict["mask_predicted_data"] = selected_mask
             
     return batch_dict
@@ -191,22 +185,14 @@ def split_data_interp(data_dict, opt):
 
 
 def add_mask(data_dict):
-    """
-    为数据添加掩码，确保掩码在正确的设备上
-    
-    Args:
-        data_dict: 包含数据的字典
-    Returns:
-        data_dict: 添加掩码后的字典
-    """
     data = data_dict["observed_data"]
     mask = data_dict["observed_mask"]
     
     if mask is None:
-        # 创建掩码时直接使用数据的设备
+
         mask = torch.ones_like(data, device=data.device)
     else:
-        # 确保掩码在正确的设备上
+
         mask = mask.to(data.device)
     
     data_dict["observed_mask"] = mask
