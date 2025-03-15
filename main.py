@@ -24,7 +24,7 @@ import visualize
 def get_opt():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--name", default="vid_ode", help='Specify experiment')
+    parser.add_argument("--name", default="ReLy_ode", help='Specify experiment')
     parser.add_argument('-j', '--workers', type=int, default=4)
     parser.add_argument('-b', '--batch_size', type=int, default=8)
     parser.add_argument('--epoch', type=int, default=500, help='epoch')
@@ -66,7 +66,7 @@ def get_opt():
     parser.add_argument('--log_dir', type=str, default='./logs', help='save tensorboard infos')
     parser.add_argument('--checkpoint_dir', type=str, default='./checkpoints', help='save checkpoint infos')
     parser.add_argument('--test_dir', type=str,
-                        default= 'storage_rely/storage_rela/logs/0314/datasetrela_extrapTrue_irregularFalse_runBackTrue_vid_ode',
+                        default= 'storage_ReLyODE/storage_rela/logs/0314/datasetrela_extrapTrue_irregularFalse_runBackTrue_ReLy_ode',
                         help='load saved model')
 
     opt = parser.parse_args()
@@ -75,7 +75,7 @@ def get_opt():
 
     if opt.phase == 'train':
         # Make Directory
-        STORAGE_PATH = utils.create_folder_ifnotexist("./storage_rely/storage_rela3")
+        STORAGE_PATH = utils.create_folder_ifnotexist("./storage_ReLyODE/storage_rela")
         STORAGE_PATH = STORAGE_PATH.resolve()
         LOG_PATH = utils.create_folder_ifnotexist(STORAGE_PATH / "logs")
         CKPT_PATH = utils.create_folder_ifnotexist(STORAGE_PATH / "checkpoints")
