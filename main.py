@@ -197,7 +197,7 @@ def train(opt, netG, loader_objs, device):
 
             # compute Adversarial loss
             with torch.set_grad_enabled(True):
-                fake = res["pred_y"]  # 使用未分离的生成数据
+                fake = res["pred_y"]  
                 loss_adv_netG = opt.lamb_adv * netD_seq.netG_adv_loss(fake.clone(), input_real.clone())
                 loss_adv_netG += opt.lamb_adv * netD_img.netG_adv_loss(fake.clone(), None)
                 total_loss_netG = loss_netG + loss_adv_netG
