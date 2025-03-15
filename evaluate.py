@@ -70,7 +70,7 @@ def Evaluation(opt, pred_list, gt_list):
 def main():
     opt = get_opt()
 
-    # Output과 Ground Truth Data
+    # Output Ground Truth Data
     pred_list = os.listdir(os.path.join(opt.result_image_dir, 'pred'))
     gt_list = os.listdir(os.path.join(opt.result_image_dir, 'gt'))
 
